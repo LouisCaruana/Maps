@@ -5,6 +5,56 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
+
+
+## Load Data
+
+`uk-towns.csv` is a file containing coordinates and meta data for all cities, towns and villages in the UK. Here I am only interested in Wales, therefore I have filtered the data to only include places within the country of Wales.
+```{r}
+UKTowns <- read.csv('uk-towns.csv')
+UKTowns %>%
+  filter(country=='Wales') -> WalesTowns
+```
+
+## Confirm that Llan is the most common prefix in Wales
+
+In order to ensure that Llan is the most common prefix of place names in Wales, I have extracted the first for letters of every place name into a new column called prefix. I have also selected for only a few columns of interest. 
+
+```{r}
+WalesTowns %>%
+  mutate(prefix = substr(WalesTowns$name, 1, 4)) %>%
+  select('name', 'prefix', 'local_government_area', 'latitude', 'longitude') -> WalesTowns
+```
+
+## Summarising all of the place name prefixes in Wales
+
+```{r}
+WalesTowns %>%
+  select(prefix) %>%
+  mutate(number = 1) %>%
+  group_by(prefix) %>%
+  summarise_all(sum) %>%
+  filter(number > 25) %>%
+  ggplot(aes(x = reorder(prefix, number), y = number)) +
+    geom_bar(stat = "identity",
+             color="#2b8cbe",
+             fill="#2b8cbe" ) + 
+    ylab("") +
+    xlab("") +
+    ggtitle("Is Llan the most common placename in Wales?") +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank())
+```
+
+
+
+
+
 
 
